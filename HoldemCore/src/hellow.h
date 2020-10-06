@@ -1,0 +1,6 @@
+
+namespace Core {
+
+	bool helloWorld();
+}
+
