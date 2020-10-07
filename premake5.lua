@@ -122,8 +122,8 @@ project "Test"
 	kind "ConsoleApp"
 	language "C++"
 	
-	--pchheader "pch.h"
-	--pchsource "src/pch.cpp"
+	pchheader "pch.h"
+	pchsource "pch.cpp"
 
 	targetdir ("bin/" .. outputdir .. "/%{prj.name}")
 	objdir ("bin-int/" .. outputdir .. "/%{prj.name}")
@@ -135,6 +135,7 @@ project "Test"
 	}
 	includedirs
 	{
+		"%{prj.name}",
 		"HoldemCore/src",
 		"HoldemApp/src",
 		"vendor/googletest/googletest/include",
