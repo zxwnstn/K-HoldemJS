@@ -1,16 +1,9 @@
-#include <iostream>
-#include <entt.hpp>
-using namespace std;
+#include "Core.h"
 
 int main()
 {
+	Core::Player player("zxwnstn", 300u);
 
-	entt::registry reg;
-	auto entity = reg.create();
-
-	while(1)
-	{
-		std::cout << 1;
-	}
-	return 0;
+	auto room = player.RequestCreateRoom();
+	
 }

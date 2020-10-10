@@ -21,6 +21,9 @@ namespace Mock {
 			CardShape Shape = CardShape::None;
 		};
 
+		Card()
+		{}
+
 		Card(int pureNo)
 		{
 			if (0 <= pureNo && pureNo < 52)

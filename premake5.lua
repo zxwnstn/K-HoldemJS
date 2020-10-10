@@ -180,7 +180,7 @@ project "WhiteBoard"
 	includedirs
 	{
 		"%{prj.name}/src",
-		"entt/src",
+		"vendor/entt/src",
 		"vendor/googletest/googletest/include"
 	}
 	links
