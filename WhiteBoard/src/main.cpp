@@ -1,46 +1,20 @@
-#include <entt.hpp>
-#include <iostream>	
+#include <unordered_map>
+#include <string>
+#include <iostream>
 
-struct my_process : entt::process<my_process, std::uint32_t> {
-	using delta_type = std::uint32_t;
-
-	my_process(delta_type delay)
-		: remaining{ delay }
-	{}
-
-	void update(delta_type delta, void *) {
-		remaining -= std::min(remaining, delta);
-
-		// ...
-
-		std::cout << "processing... \n";
-		if (!remaining) {
-			std::cout << "end";
-			succeed();
-			//__debugbreak();
-		}
-	}
-private:
-	delta_type remaining;
-};
-
-
-class A
+enum class AA
 {
-	class B
-	{
-		void update()
-		{
-			this.a = 3;
-		}
-
-	};
-
-	int a;
-	int b;
+	a, b, c, d, max
 };
 
 int main()
 {
-	
+	int max = static_cast<int>(AA::max);
+
+	AA b;
+	for (int i = 0; i < max; ++i)
+	{
+		b = static_cast<AA>(i);
+	}
+
 }

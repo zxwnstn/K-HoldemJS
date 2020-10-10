@@ -12,12 +12,32 @@ namespace Core {
 	private:
 		struct GameProcess : entt::process<GameProcess, std::uint32_t>
 		{
+			enum class Phase 
+			{
+				PreFlop, Flop, Turn, River, Clear, End
+			};
+			
+		private:
+			void preFlop();
+			void flop();
+			void turn();
+			void river();
+			void clear();
 
+		public:
+			GameProcess(Room& thisRoom);
+
+			Phase UpdateState();
+			void update(delta_type delta, void* anotherData);
+
+		private:
+			Phase CurPhase;
+			Room& ThisRoom;
 		};
 
 		struct RoomEventProcedure 
 		{
-			RoomEventProcedure(Room* room)
+			RoomEventProcedure(Room& room)
 				: room(room)
 			{
 			}
@@ -38,27 +58,28 @@ namespace Core {
 
 			}*/
 
-			Room* room;
+			Room& room;
 		};
 
 	public:
 		Room();
 
-		bool Join(Player& player);
+		bool Join(const Player& player);
 		bool Leave(Player& player);
+		bool StartGame();
 
 	private:
 		Entity createEntity();
-		Entity deleteEntity(Entity& entity);
+		bool deleteEntity(Entity& entity);
 
 	private:
 		entt::registry reg;
 
 		Entity Deck;
 		Entity Board;
-
-		entt::scheduler<uint32_t> GameProcess;
 		std::unordered_map<ID, Entity> Players;
+
+		entt::scheduler<uint32_t> Process;
 		RoomEventProcedure EventProc;
 	};
 

@@ -14,7 +14,10 @@ namespace Core {
 
 		IsHost = true;
 		room->Join(*this);
+
+		return room;
 	}
+
 
 }
 

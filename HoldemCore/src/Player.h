@@ -1,13 +1,14 @@
 #pragma once
 
-using ID = std::string;
+#include <string>
 
 namespace Core {
 
+	using ID = std::string;
 	struct Player
 	{
 
-		Player(ID id, unsigned int money = 0)
+		Player(const ID& id, int money = 0)
 			: Id(id), Money(money)
 		{
 		}

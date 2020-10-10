@@ -1,28 +1,33 @@
 #pragma once
 
-#include "pch.h"
+#include "entt.hpp"
+#include <utility>
 
-struct Entity
-{
-	Entity(entt::registry& reg)
-		: Reg(reg)
+namespace Core {
+
+	struct Entity
 	{
-		Handle = Reg.create();
-	}
+		
+		Entity(entt::registry& reg)
+			: Reg(reg)
+		{
+			Handle = Reg.create();
+		}
 
-	template<typename T>
-	T& GetComponent(entt::entity entity)
-	{
-		return Reg.get<T>(entity);
-	}
+		template<typename T>
+		T& GetComponent()
+		{
+			return Reg.get<T>(Handle);
+		}
 
-	template<typename T, typename... Args>
-	T& AttachComponenet(Args&&... args)
-	{
-		Reg.emplace<T>(Handle/*, std::forward(args)...*/);
-		return Reg.get<T>(Handle);
-	}
+		template<typename T, typename... Args>
+		void AttachComponenet(Args&&... args)
+		{
+			Reg.emplace<T>(Handle, std::forward<Args>(args)...);
+		}
 
-	entt::registry& Reg;
-	entt::entity Handle;
-};
+		entt::registry& Reg;
+		entt::entity Handle;
+	};
+
+}
