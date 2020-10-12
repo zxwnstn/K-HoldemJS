@@ -111,20 +111,24 @@ namespace Core {
 		switch (CurPhase)
 		{
 		case Phase::PreFlop:
-			preFlop();
-			return CurPhase = Phase::Flop;
+			progPreFlop();
+			break;
 		case Phase::Flop:
-			flop();
-			return CurPhase = Phase::Turn;
+			progFlop();
+			break;
 		case Phase::Turn:
-			turn();
-			return CurPhase = Phase::River;
+			progTurn();
+			break;
 		case Phase::River:
-			river();
-			return CurPhase = Phase::Clear;
+			progRiver();
+			break;
+		case Phase::Clear:
+			progClear();
+			break;
 		}
-		clear();
-		return Phase::End;
+		PauseProc();
+
+		return ++CurPhase;
 	}
 
 	void Room::GameProcess::update(delta_type delta, void * anotherData)
@@ -133,56 +137,121 @@ namespace Core {
 		succeed();
 	}
 
-	void Room::GameProcess::preFlop()
+	void Room::GameProcess::PauseProc()
+	{
+		system("pause");
+	}
+
+	void Room::GameProcess::progPreFlop()
 	{
 		ConsoleRenderer::ClearConsole();
-
 		ConsoleRenderer::Draw("PreFlop을 시작합니다");
-		auto& deck = ThisRoom.Deck.GetComponent<Hand<52>>();
+
+		//distribute Card
+		for (auto it : ThisRoom.Players)
+		{
+			auto& player = it.second;
+			auto& playerHand = player.GetComponent<Hand<2>>();
+			FillCard(playerHand, 2);
+		}
 
 	#ifdef _DEBUG
-		auto& csprite = ThisRoom.Deck.GetComponent<ConsoleSprite>();
-		csprite.Clear();
-		deck.DrawContext(csprite);
-		ConsoleRenderer::Draw(csprite);
+		RenderDeckHand();
 	#endif
+		RenderPlayerHand();
+
+		progBetting();
+	}
+
+	void Room::GameProcess::progFlop()
+	{
+		ConsoleRenderer::ClearConsole();
+		ConsoleRenderer::Draw("Flop을 시작합니다");
+
+		auto& deck = ThisRoom.Deck.GetComponent<Hand<52>>();
+		auto& boardHand = ThisRoom.Board.GetComponent<Hand<5>>();
+
+		FillCard(boardHand, 3);
+
+		RenderBoardHand();
+		RenderPlayerHand();
+
+		progBetting();
+
+		system("pause");
+	}
+
+	void Room::GameProcess::progTurn()
+	{
+		ConsoleRenderer::ClearConsole();
+		ConsoleRenderer::Draw("Turn을 시작합니다");
+
+		progBetting();
+
+		system("pause");
+	}
+
+	void Room::GameProcess::progRiver()
+	{
+		ConsoleRenderer::ClearConsole();
+		ConsoleRenderer::Draw("River를 시작합니다");
+
+		progBetting();
+
+		system("pause");
+	}
+
+	void Room::GameProcess::progClear()
+	{
+		ConsoleRenderer::ClearConsole();
+		ConsoleRenderer::Draw("----게임을 정산합니다----");
 
 		for (auto it : ThisRoom.Players)
 		{
 			auto& player = it.second;
-			player.GetComponent<Hand<2>>();
-
+			auto& playerHand = player.GetComponent<Hand<2>>();
+			playerHand.Vacate();
 		}
+
 		system("pause");
 	}
 
-	void Room::GameProcess::flop()
+	void Room::GameProcess::RenderDeckHand()
 	{
-		ConsoleRenderer::ClearConsole();
-		ConsoleRenderer::Draw("Flop을 시작합니다");
-		system("pause");
+		auto& deckHand = ThisRoom.Deck.GetComponent<Hand<52>>();
+		auto& csprite = ThisRoom.Deck.GetComponent<ConsoleSprite>();
+		csprite.Clear();
+		csprite(deckHand);
 	}
 
-	void Room::GameProcess::turn()
+	void Room::GameProcess::RenderPlayerHand()
 	{
-		ConsoleRenderer::ClearConsole();
-		ConsoleRenderer::Draw("Flop을 시작합니다");
-		system("pause");
+		for (auto it : ThisRoom.Players)
+		{
+			auto& player = it.second;
+			auto& csprite = player.GetComponent<ConsoleSprite>();
+			auto& playerHand = player.GetComponent<Hand<2>>();
+			csprite.Clear();
+			csprite << it.first;
+			//playerHand.DrawContext(csprite);
+			ConsoleRenderer::Draw(csprite);
+		}
 	}
 
-	void Room::GameProcess::river()
+	void Room::GameProcess::RenderBoardHand()
 	{
-		ConsoleRenderer::ClearConsole();
-		ConsoleRenderer::Draw("Rlop을 시작합니다");
-		system("pause");
+		auto& boardHand = ThisRoom.Board.GetComponent<Hand<5>>();
+		auto& csprite = ThisRoom.Board.GetComponent<ConsoleSprite>();
+		csprite.Clear();
+		//boardHand.DrawContext(csprite);
+		ConsoleRenderer::Draw(csprite);
 	}
 
-	void Room::GameProcess::clear()
+	void Room::GameProcess::progBetting()
 	{
-		ConsoleRenderer::ClearConsole();
-		ConsoleRenderer::Draw("----게임을 정산합니다----");
-		system("pause");
+
 	}
+	
 }
 
 

@@ -16,13 +16,12 @@ namespace Core {
 			: Count(count)
 		{
 		}
-
+		unsigned int Count;
+		
 		void DrawContext(ConsoleSprite& csprite)
 		{
-			csprite.stream << Count << "\n";
+			csprite << Count << "\n";
 		}
-
-		unsigned int Count;
 	};
 
 	enum class CardNumber
@@ -61,21 +60,24 @@ namespace Core {
 		void DrawContext(ConsoleSprite& csprite)
 		{
 			if (PureNo == 52)
+			{
+				csprite << "Empty  \t";
 				return;
+			}
 
 			switch (Spec.Shape)
 			{
 			case CardShape::Spade:
-				csprite.stream << "Spade";
+				csprite << "Spade";
 				break;
 			case CardShape::Diamond:
-				csprite.stream << "Diamond";
+				csprite << "Diamond";
 				break;
 			case CardShape::Heart:
-				csprite.stream << "Heart";
+				csprite << "Heart";
 				break;
 			case CardShape::Clover:
-				csprite.stream << "Clover";
+				csprite << "Clover";
 				break;
 			}
 
@@ -83,22 +85,22 @@ namespace Core {
 			switch (number)
 			{
 			case 0:
-				csprite.stream << "A";
+				csprite << "A";
 				break;
 			case 10:
-				csprite.stream << "J";
+				csprite << "J";
 				break;
 			case 11:
-				csprite.stream << "Q";
+				csprite << "Q";
 				break;
 			case 12:
-				csprite.stream << "K";
+				csprite << "K";
 				break;
 			default:
-				csprite.stream << number + 1;
+				csprite << number + 1;
 				break;
 			}
-			csprite.stream << "  \t";
+			csprite << "  \t";
 		}
 
 		CardSpec Spec;
@@ -127,35 +129,13 @@ namespace Core {
 		void Vacate()
 		{
 			Hands.fill(NoneCard);
+			ResetPtr();
 		}
 
 		Card BringCard()
 		{
 			return Hands[cardPtr++];
 		}
-
-		void DrawContext(ConsoleSprite& csprite)
-		{
-			switch (Max)
-			{
-			case 2:
-				csprite.stream << "플레이어 핸드\n";
-			case 5:
-				csprite.stream << "보드의 카드\n";
-			case 52:
-				csprite.stream << "덱 리스트\n";
-			}
-			for (int i = 0; i < Max; ++i)
-			{
-				Hands[i].DrawContext(csprite);
-				if (i % 6 == 5)
-				{
-					csprite.stream << "\n";
-				}
-			}
-			csprite.stream << "\n";
-		}
-
 		void Shuffle()
 		{
 			if (Max != 52)
@@ -166,6 +146,31 @@ namespace Core {
 			std::mt19937 g(rd());
 
 			std::shuffle(Hands.begin(), Hands.end(), g);
+		}
+
+		void DrawContext(ConsoleSprite& csprite)
+		{
+			switch (Max)
+			{
+			case 2:
+				csprite << "플레이어 핸드\n";
+				break;
+			case 5:
+				csprite << "보드의 카드\n";
+				break;
+			case 52:
+				csprite << "덱 리스트\n";
+				break;
+			}
+			for (int i = 0; i < Max; ++i)
+			{
+				Hands[i].DrawContext(csprite);
+				if (i % 6 == 5)
+				{
+					csprite << "\n";
+				}
+			}
+			csprite << "\n";
 		}
 
 		unsigned int cardPtr;
