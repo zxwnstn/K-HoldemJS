@@ -31,17 +31,27 @@ namespace Core {
 				return phase = static_cast<Phase>(++ToInt);
 			}
 
+			std::string ToString(Phase& phase)
+			{
+				switch (phase)
+				{
+				case Phase::PreFlop: return "PreFlop";
+				case Phase::Flop: return "Flop";
+				case Phase::Turn: return "Turn";
+				case Phase::River: return "River";
+				case Phase::Clear: return "Clear";
+				}
+				return "";
+			}
+
 		private:
-			void progPreFlop();
-			void progFlop();
-			void progTurn();
-			void progRiver();
+			void progPhase();
 			void progClear();
 			void progBetting();
 
 			template<typename _Hand>
 			[[maybe_unused]]
-			typename std::void_t<decltype(std::declval<_Hand>().TakeCard(Card()))>
+			typename std::void_t<decltype(std::declval<_Hand>().TakeCard(std::declval<Card>()))>
 				FillCard(_Hand& Reciever, uint32_t count = 1)
 			{
 				auto& deck = ThisRoom.Deck.GetComponent<Hand<52>>();
@@ -63,6 +73,8 @@ namespace Core {
 			void PauseProc();
 
 		private:
+			bool BettingDone;
+			std::unordered_map<ID, Entity>::iterator PlayerIterator;
 			Phase CurPhase;
 			Room& ThisRoom;
 		};
@@ -86,11 +98,6 @@ namespace Core {
 			}
 
 			void Dispatch(Event* event)
-			{
-
-			}
-
-			void ComponentUpdate()
 			{
 
 			}

@@ -31,22 +31,13 @@ namespace Core {
 
 		template<typename RenderTarget>
 		[[maybe_unused]]
-		typename std::void_t<decltype(std::declval<RenderTarget>().DrawContext())>
+		typename std::void_t<decltype(std::declval<RenderTarget>().DrawContext(std::declval<ConsoleSprite>()))>
 			operator()(RenderTarget& target)
 		{
 			target.DrawContext(*this);
 		}
 
 		std::stringstream stream;
-
-	#if _DEBUG
-		template<typename RenderTarget>
-		bool operator()(RenderTarget& target)
-		{
-			std::cout << "Can't be drawn by Console";
-			return false;
-		}
-	#endif
 	};
 
 }

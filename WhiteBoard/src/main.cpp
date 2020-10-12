@@ -57,40 +57,73 @@
 //
 //}
 
-template<typename GameProcedure, typename EventProcessor>
-struct Room
+#include <entt.hpp>
+#include <iostream>
+struct Player { 
+	int p; 
+	void some()
+	{
+		int k;
+		auto func = [this]() 
+		{ 
+			std::cout << p << std::endl; 
+		};
+	}
+
+};
+struct Entity { int e; };
+
+
+template<typename GameProcedure, typename EventProcessor, typename... BasicComponents>
+struct RoomBase
 {
-	Room()
+	RoomBase()
 		: proc(*this), eventHandle(*this)
 	{
 	}
 
-	GameProcedure proc;
-	EventProcessor eventHandle;
+	bool Join(const Player& player)
+	{
+	}
+
+	bool Leave(Player& player)
+	{
+
+	}
+	bool StartGame()
+	{
+		GameProc.attach<GameProcedure>(*this);
+		GameProc.update(1u);
+		return true;
+	}
+
+protected:
+	Entity createEntity() {}
+	bool deleteEntity(Entity& entity) {}
+
+	entt::registry Reg;
+	entt::scheduler<uint32_t> GameProc;
+	EventProcessor EventProc;
 };
 
-struct HoldemProcedure
+struct ProcedureBase
 {
-	template<typename T, typename U>
-	using RoomBase = Room<T, U>;
-	using RoomType = RoomBase<HoldemProcedure, class HoldemEventProc>;
+	template<typename GameProcedure, typename EventProcessor>
+	using RoomType = RoomBase<GameProcedure, EventProcessor>;
 
-
-	HoldemProcedure(RoomType& thisRoom)
+	template<typename GameProcedure, typename EventProcessor>
+	ProcedureBase(RoomBase<GameProcedure, EventProcessor>& thisRoom)
 		: ThisRoom(thisRoom)
 	{
 	}
 
 	int a;
-	RoomType& ThisRoom;
+	RoomType& room;
 };
 
-struct HoldemEventProc
+struct EventProcBase
 {
 	template<typename T, typename U>
-	using RoomBase = Room<T, U>;
-	using RoomType = RoomBase<HoldemProcedure, HoldemEventProc>;
-
 	HoldemEventProc(RoomType& thisRoom)
 		: ThisRoom(thisRoom)
 	{
@@ -100,8 +133,17 @@ struct HoldemEventProc
 	RoomType& ThisRoom;
 };
 
+struct HoldemProcedure : ProcedureBase
+{
+
+};
+
+struct HoldemEventProc : EventProcBase
+{
+
+};
+
 int main()
 {
-	Room<HoldemProcedure, HoldemEventProc> room;
-
+	RoomBase<HoldemProcedure, HoldemEventProc> HoldemRoom;
 }

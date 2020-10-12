@@ -3,6 +3,8 @@
 #include "pch.h"
 
 #include "RenderingComponenet.h"
+#include "Input.h"
+#include "ConsoleRenderer.h"
 
 namespace Core {
 
@@ -176,6 +178,27 @@ namespace Core {
 		unsigned int cardPtr;
 		std::array<Card, Max> Hands;
 	};
+	
+	enum class ActionList
+	{
+		BBing, Check, Raise, Allin, Call, Die,
+	};
 
+	struct Controller
+	{
+		void Exec()
+		{
+			ConsoleRenderer::Draw("0 : BBing");
+			ConsoleRenderer::Draw("1 : Check");
+			ConsoleRenderer::Draw("2 : Raise");
+			ConsoleRenderer::Draw("3 : Allin");
+			ConsoleRenderer::Draw("4 : Call");
+			ConsoleRenderer::Draw("5 : Die");
+
+			Input::GetClampUint32(0, 5);
+		}
+
+		int a;
+	};
 	
 }
