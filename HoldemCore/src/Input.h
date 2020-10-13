@@ -25,7 +25,7 @@ namespace Core {
 				{
 					break;
 				}
-				std::cout << "잘못된 입력입니다.";
+				std::cout << "잘못된 입력입니다. 다시 입력해 주세요 : ";
 			}
 			return ret;
 		}
@@ -47,7 +47,7 @@ namespace Core {
 				{
 					break;
 				}
-				std::cout << "잘못된 입력입니다.";
+				std::cout << "잘못된 입력입니다. 다시 입력해 주세요 : ";
 			}
 			return ret;
 		}

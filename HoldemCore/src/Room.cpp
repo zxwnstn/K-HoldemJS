@@ -5,7 +5,7 @@
 namespace Core {
 
 	Room::Room()
-		: EventProc(*this), Deck(reg), Board(reg)
+		: EventProc(this), Deck(reg), Board(reg)
 	{
 		Deck.AttachComponenet<Hand<52>>();
 		Deck.AttachComponenet<ConsoleSprite>();
@@ -50,8 +50,16 @@ namespace Core {
 		playerEntity.AttachComponenet<Chip>(player.Money);
 		playerEntity.AttachComponenet<Hand<2>>();
 		playerEntity.AttachComponenet<ConsoleSprite>();
-		playerEntity.AttachComponenet<Controller>();
+		playerEntity.AttachComponenet<Controller>(playerEntity.Handle);
 		playerEntity.GetComponent<ConsoleSprite>() << "ID : " << player.Id << "\n";
+		
+		{
+			auto& controller = playerEntity.GetComponent<Controller>();
+			entt::sink sink_act{controller.OnAction};
+			entt::sink sink_req{controller.OnRequest};
+			sink_act.connect<&RoomEventProcedure::OnEvent>(EventProc);
+			sink_req.connect<&RoomEventProcedure::OnReqeust>(EventProc);
+		}
 
 		ConsoleRenderer::Draw(player.Id + "님이 입장하셧습니다.");
 
@@ -90,6 +98,7 @@ namespace Core {
 			return false;
 		}
 
+		EventProc.Init();
 		Process.attach<GameProcess>(*this);
 		Process.update(1u);
 		return true;
@@ -167,6 +176,16 @@ namespace Core {
 		RenderPlayerHand();
 
 		progBetting();
+
+		Event e1{ EventType::Request, static_cast<uint32_t>(HodlemRequest::CheckGameComplete), entt::null };
+		auto GameComplete = ThisRoom.EventProc.OnReqeust(e1);
+		if (std::any_cast<bool>(GameComplete))
+		{
+			CurPhase = Phase::Clear;
+		}
+
+		Event e2{ EventType::Request, static_cast<uint32_t>(HodlemRequest::ResetBettingState), entt::null };
+		ThisRoom.EventProc.OnReqeust(e2);
 	}
 
 	void Room::GameProcess::progClear()
@@ -216,7 +235,7 @@ namespace Core {
 
 	void Room::GameProcess::progBetting()
 	{
-		while (BettingDone) 
+		while (!ThisRoom.EventProc.bettingState.BettingComplete())
 		{
 			ConsoleRenderer::Draw(PlayerIterator->first + "님의 차례입니다 가능한 액션을 선택해 주세요!");
 			auto curPlayer = PlayerIterator->second;
@@ -225,10 +244,10 @@ namespace Core {
 			curPlayerController.Exec();
 
 			PlayerIterator++;
+
 			if (PlayerIterator == ThisRoom.Players.end())
 			{
 				PlayerIterator = ThisRoom.Players.begin();
-				break;
 			}
 		}
 	}

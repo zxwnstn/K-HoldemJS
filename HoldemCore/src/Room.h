@@ -3,12 +3,8 @@
 #include "Player.h"
 #include "SubComponent.h"
 
+
 namespace Core {
-
-	struct Event
-	{
-
-	};
 
 	struct Room
 	{
@@ -71,38 +67,12 @@ namespace Core {
 			Phase UpdateState();
 			void update(delta_type delta, void* anotherData);
 			void PauseProc();
-
+			
 		private:
 			bool BettingDone;
 			std::unordered_map<ID, Entity>::iterator PlayerIterator;
 			Phase CurPhase;
 			Room& ThisRoom;
-		};
-
-		struct RoomEventProcedure
-		{
-			RoomEventProcedure(Room& room)
-				: room(room)
-			{
-			}
-
-			void Recive(Event* event)
-			{
-				Decode(event);
-				Dispatch(event);
-			}
-
-			void Decode(Event* event)
-			{
-
-			}
-
-			void Dispatch(Event* event)
-			{
-
-			}
-
-			Room& room;
 		};
 
 	public:
@@ -111,6 +81,7 @@ namespace Core {
 		bool Join(const Player& player);
 		bool Leave(Player& player);
 		bool StartGame();
+		inline size_t GetPlayerCount() const { return Players.size(); }
 
 	private:
 		Entity createEntity();
@@ -125,6 +96,8 @@ namespace Core {
 
 		entt::scheduler<uint32_t> Process;
 		RoomEventProcedure EventProc;
+
+		friend class RoomEventProcedure;
 	};
 
 

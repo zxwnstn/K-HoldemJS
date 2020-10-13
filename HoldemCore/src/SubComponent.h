@@ -5,6 +5,7 @@
 #include "RenderingComponenet.h"
 #include "Input.h"
 #include "ConsoleRenderer.h"
+#include "Event.h"
 
 namespace Core {
 
@@ -14,16 +15,28 @@ namespace Core {
 			: Count(0)
 		{}
 
-		Chip(unsigned int count)
+		Chip(int count)
 			: Count(count)
 		{
 		}
-		unsigned int Count;
 		
+		bool Spend(int count)
+		{
+			Count -= count;
+			if (Count < 0)
+			{
+				Count += count;
+				return false;
+			}
+			return true;
+		}
+
 		void DrawContext(ConsoleSprite& csprite)
 		{
 			csprite << Count << "\n";
 		}
+
+		int Count;
 	};
 
 	enum class CardNumber
@@ -179,26 +192,33 @@ namespace Core {
 		std::array<Card, Max> Hands;
 	};
 	
-	enum class ActionList
-	{
-		BBing, Check, Raise, Allin, Call, Die,
-	};
+	
 
 	struct Controller
 	{
-		void Exec()
+		Controller(entt::entity handle)
+			: MyHandle(handle)
 		{
-			ConsoleRenderer::Draw("0 : BBing");
-			ConsoleRenderer::Draw("1 : Check");
-			ConsoleRenderer::Draw("2 : Raise");
-			ConsoleRenderer::Draw("3 : Allin");
-			ConsoleRenderer::Draw("4 : Call");
-			ConsoleRenderer::Draw("5 : Die");
-
-			Input::GetClampUint32(0, 5);
 		}
 
-		int a;
+		void Exec()
+		{
+			std::any rawData;
+			Event req{ EventType::GameAction, static_cast<uint32_t>(HodlemRequest::PossibleAction), MyHandle };
+			OnRequest.collect([&rawData](auto& data) { rawData = data; }, req);
+			auto ActionList = std::any_cast<std::vector<uint32_t>>(rawData);
+
+			for (int i = 0; i < ActionList.size(); ++i)
+				ConsoleRenderer::Draw(std::to_string(i) + " : " + to_string(static_cast<HodlemAction>(ActionList[i])));
+
+			auto input = Input::GetClampUint32(0, ActionList.size() - 1);
+			Event event{ EventType::GameAction, ActionList[input], MyHandle };
+			OnAction.publish(event);
+		}
+
+		entt::entity MyHandle;
+		entt::sigh<void(Event&)> OnAction;
+		entt::sigh<std::any(Event&)> OnRequest;
 	};
 	
 }
