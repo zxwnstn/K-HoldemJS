@@ -31,9 +31,14 @@ namespace Core {
 			return true;
 		}
 
+		void Get(int count)
+		{
+			Count += count;
+		}
+
 		void DrawContext(ConsoleSprite& csprite)
 		{
-			csprite << Count << "\n";
+			csprite << "Chips : " << Count << "\n";
 		}
 
 		int Count;
@@ -168,10 +173,11 @@ namespace Core {
 			switch (Max)
 			{
 			case 2:
-				csprite << "플레이어 핸드\n";
+				csprite << "Hands : ";
 				break;
 			case 5:
-				csprite << "보드의 카드\n";
+				csprite << "보드\n";
+				csprite << "Hands : ";
 				break;
 			case 52:
 				csprite << "덱 리스트\n";
@@ -209,7 +215,7 @@ namespace Core {
 			auto ActionList = std::any_cast<std::vector<uint32_t>>(rawData);
 
 			for (int i = 0; i < ActionList.size(); ++i)
-				ConsoleRenderer::Draw(std::to_string(i) + " : " + to_string(static_cast<HodlemAction>(ActionList[i])));
+				ConsoleRenderer::Draw(std::to_string(i) + " : " + ToString(static_cast<HodlemAction>(ActionList[i])));
 
 			auto input = Input::GetClampUint32(0, ActionList.size() - 1);
 			Event event{ EventType::GameAction, ActionList[input], MyHandle };

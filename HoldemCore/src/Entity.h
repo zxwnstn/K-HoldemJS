@@ -7,7 +7,6 @@ namespace Core {
 
 	struct Entity
 	{
-		
 		Entity(entt::registry& reg)
 			: Reg(reg)
 		{

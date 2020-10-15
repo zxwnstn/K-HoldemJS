@@ -168,12 +168,8 @@ namespace Core {
 			break;
 		}
 
-	#ifdef _DEBUG
-		RenderDeckHand();
-	#endif
-
-		RenderBoardHand();
-		RenderPlayerHand();
+		RenderDeck();
+		PauseProc();
 
 		progBetting();
 
@@ -182,6 +178,7 @@ namespace Core {
 		if (std::any_cast<bool>(GameComplete))
 		{
 			CurPhase = Phase::Clear;
+			return;
 		}
 
 		Event e2{ EventType::Request, static_cast<uint32_t>(HodlemRequest::ResetBettingState), entt::null };
@@ -193,43 +190,71 @@ namespace Core {
 		ConsoleRenderer::ClearConsole();
 		ConsoleRenderer::Draw("----게임을 정산합니다----");
 
+		RenderBoard();
+		for (auto&[name, entity]: ThisRoom.Players)
+		{
+			ConsoleRenderer::Draw(name, false);
+			RenderPlayer(name);
+		}
+
+		Event e{ EventType::Request, static_cast<uint32_t>(HodlemRequest::JudgeWinner), entt::null };
+		auto raw = ThisRoom.EventProc.OnReqeust(e);
+		auto winnerName = std::any_cast<std::string>(raw);
+		ConsoleRenderer::Draw("승자는 " + winnerName + "입니다!");
+
+		auto& boardChip = ThisRoom.Board.GetComponent<Chip>();
+		auto findWinner = ThisRoom.Players.find(winnerName);
+		auto& winnerChip = findWinner->second.GetComponent<Chip>();
+
+		winnerChip.Get(boardChip.Count);
+		boardChip.Count = 0;
+
 		for (auto it : ThisRoom.Players)
 		{
 			auto& player = it.second;
 			auto& playerHand = player.GetComponent<Hand<2>>();
 			playerHand.Vacate();
-		}
+		}		
 	}
 
-	void Room::GameProcess::RenderDeckHand()
+	void Room::GameProcess::RenderDeck()
 	{
+	#ifdef _DEBUG_
+	#endif
 		auto& deckHand = ThisRoom.Deck.GetComponent<Hand<52>>();
 		auto& csprite = ThisRoom.Deck.GetComponent<ConsoleSprite>();
+
 		csprite.Clear();
 		csprite(deckHand);
 		ConsoleRenderer::Draw(csprite);
 	}
 
-	void Room::GameProcess::RenderPlayerHand()
+	void Room::GameProcess::RenderPlayer(ID id)
 	{
-		for (auto it : ThisRoom.Players)
-		{
-			auto& player = it.second;
-			auto& csprite = player.GetComponent<ConsoleSprite>();
-			auto& playerHand = player.GetComponent<Hand<2>>();
-			csprite.Clear();
-			csprite << it.first;
-			csprite(playerHand);
-			ConsoleRenderer::Draw(csprite);
-		}
+		auto find = ThisRoom.Players.find(id);
+		auto& player = find->second;
+		auto& playerHand = player.GetComponent<Hand<2>>();
+		auto& playerChip = player.GetComponent<Chip>();
+		auto& csprite = player.GetComponent<ConsoleSprite>();
+		
+		csprite.Clear();
+		csprite << "\n";
+		csprite(playerHand);
+		csprite(playerChip);
+		ConsoleRenderer::Draw(csprite);
 	}
 
-	void Room::GameProcess::RenderBoardHand()
+	void Room::GameProcess::RenderBoard()
 	{
 		auto& boardHand = ThisRoom.Board.GetComponent<Hand<5>>();
+		auto& boardChip = ThisRoom.Board.GetComponent<Chip>();
 		auto& csprite = ThisRoom.Board.GetComponent<ConsoleSprite>();
 		csprite.Clear();
 		csprite(boardHand);
+
+		csprite.Clear();
+		csprite(boardHand);
+		csprite(boardChip);
 		ConsoleRenderer::Draw(csprite);
 	}
 
@@ -237,7 +262,11 @@ namespace Core {
 	{
 		while (!ThisRoom.EventProc.bettingState.BettingComplete())
 		{
+			ConsoleRenderer::ClearConsole();
+			RenderBoard();
 			ConsoleRenderer::Draw(PlayerIterator->first + "님의 차례입니다 가능한 액션을 선택해 주세요!");
+			RenderPlayer(PlayerIterator->first);
+
 			auto curPlayer = PlayerIterator->second;
 
 			auto curPlayerController = curPlayer.GetComponent<Controller>();
@@ -250,6 +279,7 @@ namespace Core {
 				PlayerIterator = ThisRoom.Players.begin();
 			}
 		}
+		
 	}
 
 }

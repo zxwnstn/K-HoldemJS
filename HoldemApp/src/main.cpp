@@ -2,8 +2,8 @@
 
 int main()
 {
-	Core::Player zxwnstn("zxwnstn", 2000u);
-	Core::Player kiseop("kiseop", 2000u);
+	Core::Player zxwnstn("zxwnstn", 200000u);
+	Core::Player kiseop("kiseop", 200000u);
 
 	auto room = zxwnstn.RequestCreateRoom();
 

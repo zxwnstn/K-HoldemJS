@@ -1,8 +1,9 @@
+#pragma once 
+
 #include "Entity.h"
 
 #include "Player.h"
 #include "SubComponent.h"
-
 
 namespace Core {
 
@@ -58,9 +59,9 @@ namespace Core {
 			}
 
 		private:
-			void RenderDeckHand();
-			void RenderPlayerHand();
-			void RenderBoardHand();
+			void RenderDeck();
+			void RenderPlayer(ID id);
+			void RenderBoard();
 
 		public:
 			GameProcess(Room& thisRoom);
@@ -98,6 +99,7 @@ namespace Core {
 		RoomEventProcedure EventProc;
 
 		friend class RoomEventProcedure;
+		friend class BettingState;
 	};
 
 

@@ -1,5 +1,7 @@
 #pragma once
 
+#include <string>
+
 namespace Core {
 
 	
@@ -10,7 +12,7 @@ namespace Core {
 
 	enum class HodlemRequest : uint32_t
 	{
-		ResetBettingState, CheckBettingComplete, CheckGameComplete, PossibleAction
+		ResetBettingState, CheckBettingComplete, CheckGameComplete, PossibleAction, JudgeWinner
 	};
 
 	enum class HodlemAction : uint32_t
@@ -18,7 +20,7 @@ namespace Core {
 		BBing, Check, Raise, Allin, Call, Die, None
 	};
 
-	inline std::string to_string(HodlemAction action)
+	inline std::string ToString(HodlemAction action)
 	{
 		switch (action)
 		{
@@ -49,72 +51,22 @@ namespace Core {
 
 	struct BettingState
 	{
-		bool BettingComplete()
-		{
-			if (DieCount - 1 == PlayerCount)
-				return true;
+		bool BettingComplete();
 
-			if (CallCount - 1 == PlayerCount)
-				return true;
+		bool GameComplete();
 
-			return false;
-		}
-
-		bool GameComplete()
-		{
-			if (DieCount - 1 == PlayerCount)
-				return true;
-
-			return false;
-		}
-
-		uint32_t GetTotal() const noexcept
-		{
-			return Total;
-		}
-
-		std::vector<uint32_t> GetPossibleAction()
-		{
-			std::vector<uint32_t> ret;
-			ret.reserve(static_cast<size_t>(HodlemAction::None));
-
-			if (LastAction == HodlemAction::None)
-			{
-				ret.emplace_back(static_cast<uint32_t>(HodlemAction::BBing));
-				ret.emplace_back(static_cast<uint32_t>(HodlemAction::Check));
-			}
-			if(!AllinFlag)
-			{
-				ret.emplace_back(static_cast<uint32_t>(HodlemAction::Raise));
-				ret.emplace_back(static_cast<uint32_t>(HodlemAction::Allin));
-			}
-			ret.emplace_back(static_cast<uint32_t>(HodlemAction::Call));
-			ret.emplace_back(static_cast<uint32_t>(HodlemAction::Die));
-
-			return ret;
-		}
-
-		void Reset()
-		{
-			bettingAmount.clear();
-
-			LastRaise = 0;
-			CallCount = 0;
-			Total = 0;
-			DieCount = 0;
-			PhaseCount = 0;
-			LastAction = HodlemAction::None;
-			AllinFlag = false;
-		}
+		std::string JudgeWinner(class Room* room);
+		std::vector<uint32_t> GetPossibleAction();
+		bool ResetTurn();
+		bool ResetGame();
 
 		std::unordered_map<entt::entity, uint32_t> bettingAmount;
+		std::vector<entt::entity> die;
 
 		HodlemAction LastAction = HodlemAction::None;
 		uint32_t LastRaise = 0;
 		uint32_t CallCount = 0;
 		uint32_t PlayerCount;
-		uint32_t DieCount = 0;
-		uint32_t Total = 0;
 		uint32_t PhaseCount = 0;
 		bool AllinFlag = false;
 	};
@@ -135,10 +87,6 @@ namespace Core {
 		bool OnAllin(entt::entity From);
 		bool OnCall(entt::entity From);
 		bool OnDie(entt::entity From);
-
-		std::vector<uint32_t> PossibleAction(entt::entity handle);
-		bool ResetBettingState();
-		bool CheckBettingComplete();
 
 		BettingState bettingState;
 		Room* room;

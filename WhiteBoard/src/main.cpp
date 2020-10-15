@@ -149,18 +149,31 @@
 //}
 
 #include <unordered_map>
-
+#include <functional>
+#include <iostream>
 int f(int) { return 0; }
 int g(int) { return 1; }
 
+void s(int a, int b, int c)
+{
+	std::cout << a << b << c;
+}
 // ...
 
+
+struct ss
+{
+	ss(int a)
+		: a(a)
+	{}
+	int a;
+};
 int main()
 {
-	std::unordered_map<std::string, int> map;
-	map["zxwnstn"] = 10;
-	map["kiseop"] = 10;
-	map["zxwnstn"] += 10;
+	std::unordered_map<std::string, ss> map;
+
+	//auto& k = map["zxwnstn"];
+	
 }
 
 
