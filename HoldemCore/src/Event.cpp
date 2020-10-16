@@ -42,6 +42,8 @@ namespace Core {
 			return bettingState.GameComplete();
 		case HodlemRequest::JudgeWinner:
 			return bettingState.JudgeWinner(room);
+		case HodlemRequest::ResetGame:
+			return bettingState.ResetGame();
 		}
 		return -1;
 	}
@@ -49,7 +51,7 @@ namespace Core {
 	bool RoomEventProcedure::OnGameAction(Event & event)
 	{
 		auto Action = static_cast<HodlemAction>(event.Spec);
-		ConsoleRenderer::Draw("OnEvent! GameAction : " + ToString(Action));
+		//ConsoleRenderer::Draw("OnEvent! GameAction : " + ToString(Action));
 
 		switch (Action)
 		{
@@ -211,12 +213,15 @@ namespace Core {
 			ret.emplace_back(static_cast<uint32_t>(HodlemAction::BBing));
 			ret.emplace_back(static_cast<uint32_t>(HodlemAction::Check));
 		}
+		else
+		{
+			ret.emplace_back(static_cast<uint32_t>(HodlemAction::Call));
+		}
 		if (!AllinFlag)
 		{
 			ret.emplace_back(static_cast<uint32_t>(HodlemAction::Raise));
 			ret.emplace_back(static_cast<uint32_t>(HodlemAction::Allin));
 		}
-		ret.emplace_back(static_cast<uint32_t>(HodlemAction::Call));
 		ret.emplace_back(static_cast<uint32_t>(HodlemAction::Die));
 
 		return ret;
@@ -261,12 +266,68 @@ namespace Core {
 			RoyalStrateFlush
 		};
 
+		std::string ToString(std::pair<uint32_t, uint32_t>& result)
+		{
+			std::string ret;
+			if (result.first + result.second == 0)
+			{
+				return ret += "Die";
+			}
+			switch (result.first)
+			{
+			case HighCard:
+				ret += "HighCard";
+				break;
+			case OnePair:
+				ret += "OnePair";
+				break;
+			case Twopair:
+				ret += "Twopair";
+				break;
+			case ThreeKind:
+				ret += "ThreeKind";
+				break;
+			case Straight:
+				ret += "Straight";
+				break;
+			case Flush:
+				ret += "Flush";
+				break;
+			case FullHouse:
+				ret += "FullHouse";
+				break;
+			case FourCard:
+				ret += "FourCard";
+				break;
+			case StraightFlush:
+				ret += "StraightFlush";
+				break;
+			case RoyalStrateFlush:
+				ret += "RoyalStrateFlush";
+				break;
+			}
+
+			if (result.first == FullHouse)
+			{
+				ret += " " + std::to_string(result.second / 100 + 1) + "Top";
+			}
+			else
+			{
+				ret += " " + std::to_string(result.second + 1) + "Top";
+			}
+			return ret;
+		}
+
 		std::pair<uint32_t, uint32_t> CheckCombo(const std::vector<Card>& cards)
 		{
 			uint32_t numberBoard[13]{0};
 			uint32_t shapeBoard[4]{0};
 			for (int i = 0; i < 7; ++i)
 			{
+				if (cards[i].PureNo == 52)
+				{
+					continue;
+				}
 				numberBoard[static_cast<uint32_t>(cards[i].Spec.Number)] += 1;
 				shapeBoard[static_cast<uint32_t>(cards[i].Spec.Shape)] += 1;
 			}
@@ -416,7 +477,8 @@ namespace Core {
 
 			if (playerhand.Hands[0].PureNo == 52)
 			{
-				v.push_back({ id, {0, 0} });
+				v.push_back({ id, { 0, 0 } });
+				ConsoleRenderer::Draw(id + " : Die ");
 				continue;
 			}
 
@@ -424,7 +486,9 @@ namespace Core {
 			{
 				totalCards.emplace_back(playerhand.Hands[i]);
 			}
-			v.push_back({ id, Ranks::CheckCombo(totalCards) });
+			auto& result = Ranks::CheckCombo(totalCards);
+			ConsoleRenderer::Draw(id + " : " + Ranks::ToString(result));
+			v.emplace_back(id, result);
 		}
 
 		std::sort(v.begin(), v.end(), [](auto& lhs, auto& rhs) {

@@ -12,7 +12,7 @@ namespace Core {
 
 	enum class HodlemRequest : uint32_t
 	{
-		ResetBettingState, CheckBettingComplete, CheckGameComplete, PossibleAction, JudgeWinner
+		ResetBettingState, ResetGame, CheckBettingComplete, CheckGameComplete, PossibleAction, JudgeWinner
 	};
 
 	enum class HodlemAction : uint32_t

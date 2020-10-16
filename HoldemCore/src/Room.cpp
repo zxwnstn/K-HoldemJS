@@ -177,7 +177,7 @@ namespace Core {
 		auto GameComplete = ThisRoom.EventProc.OnReqeust(e1);
 		if (std::any_cast<bool>(GameComplete))
 		{
-			CurPhase = Phase::Clear;
+			CurPhase = Phase::River;
 			return;
 		}
 
@@ -214,19 +214,21 @@ namespace Core {
 			auto& player = it.second;
 			auto& playerHand = player.GetComponent<Hand<2>>();
 			playerHand.Vacate();
-		}		
+		}
+		Event e1{ EventType::Request, static_cast<uint32_t>(HodlemRequest::ResetGame), entt::null };
+		ThisRoom.EventProc.OnReqeust(e1);
 	}
 
 	void Room::GameProcess::RenderDeck()
 	{
 	#ifdef _DEBUG_
-	#endif
 		auto& deckHand = ThisRoom.Deck.GetComponent<Hand<52>>();
 		auto& csprite = ThisRoom.Deck.GetComponent<ConsoleSprite>();
 
 		csprite.Clear();
 		csprite(deckHand);
 		ConsoleRenderer::Draw(csprite);
+	#endif
 	}
 
 	void Room::GameProcess::RenderPlayer(ID id)
