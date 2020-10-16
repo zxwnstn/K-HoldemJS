@@ -1,12 +1,9 @@
-#include <chrono>
+#pragma once
+
 #include <condition_variable>
-#include <cstdio>
-#include <functional>
 #include <future>
-#include <mutex>
 #include <queue>
-#include <thread>
-#include <vector>
+#include <mutex>
 
 #define POOL_MAX 50
 
@@ -18,9 +15,10 @@ public:
 		Workers.reserve(POOL_MAX);
 		for (uint32_t i = 0; i < POOL_MAX; ++i)
 		{
-			Workers.emplace_back([this]() {this->Woker();});
+			Workers.emplace_back([this]() {this->Woker(); });
 		}
 	}
+
 	~ThreadPool()
 	{
 		Stop = true;
@@ -73,29 +71,3 @@ public:
 	bool Stop = false;
 	std::mutex mtx;
 };
-
-// 사용 예시
-int work(int t, int id) 
-{
-	printf("%d start \n", id);
-	std::this_thread::sleep_for(std::chrono::seconds(t));
-	printf("%d end after %ds\n", id, t);
-	return t + id;
-}
-
-void some()
-{
-	printf("hellow");
-}
-
-int main() {
-	ThreadPool pool;
-
-	std::vector<std::future<int>> futures;
-	for (int i = 0; i < 10; i++) 
-	{
-		futures.emplace_back(pool.EnqueueJob(work, i % 3 + 1, i));
-	}
-	
-	
-}

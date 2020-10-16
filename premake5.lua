@@ -78,6 +78,43 @@ project "HoldemCore"
 		runtime "Release"
 		optimize "On"
 
+project "HoldemServer"
+	location "HoldemServer"
+	kind "ConsoleApp"
+	language "C++"
+	
+	pchheader "pch.h"
+	pchsource "src/pch.cpp"
+
+	targetdir ("bin/" .. outputdir .. "/%{prj.name}")
+	objdir ("bin-int/" .. outputdir .. "/%{prj.name}")
+
+	files
+	{
+		"%{prj.name}/src/**.h",
+		"%{prj.name}/src/**.cpp"
+	}
+	includedirs
+	{
+		"%{prj.name}/src",
+		"HoldemCore/src",
+		"vendor/entt/src"
+	}
+	links
+	{
+		"HoldemCore"
+	}
+
+	filter "system:windows"
+		cppdialect "C++17"
+		staticruntime "On"
+		systemversion "latest"
+
+	filter "configurations:Debug"
+		symbols "On"
+	
+	filter "configurations:Release"
+		optimize "On"
 
 project "HoldemApp"
 	location "HoldemApp"
