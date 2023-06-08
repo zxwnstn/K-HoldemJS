@@ -9,6 +9,7 @@ namespace Core {
 		: room(room)
 	{
 		
+
 	}
 
 	void RoomEventProcedure::Init()
